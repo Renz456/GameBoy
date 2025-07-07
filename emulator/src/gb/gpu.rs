@@ -253,7 +253,7 @@ impl<'a> GPU<'a> {
     fn render_background(&mut self) {
         let lcdc = self.get_lcdc();
         let y = self.current_scanline;
-        println!("y: {:?}", y);
+        
         // Get the base address for the tile map
         let tile_map_addr = if lcdc.bg_tile_map_display_select {
             0x9C00
@@ -276,7 +276,6 @@ impl<'a> GPU<'a> {
             
             // Get tile number from tile map
             let tile_map_index = (tile_y as u16 * 32 + tile_x as u16) + tile_map_addr;
-            // println!("Tile map index: {:?}", tile_map_index);
             let tile_number = self.read_vram(tile_map_index as u16);
             
             // Get tile data
@@ -285,7 +284,6 @@ impl<'a> GPU<'a> {
             } else {
                 tile_data_addr + ((tile_number as i8 as i16 + 128) * 16) as u16
             };
-            // println!("tile number: {:?}, tile addr: {:x}", tile_number, tile_addr);
 
             // Get pixel position within tile
             let pixel_x = x % 8;
@@ -295,17 +293,9 @@ impl<'a> GPU<'a> {
             let tile_line = self.read_vram(tile_addr + (pixel_y * 2) as u16);
             let tile_line_high = self.read_vram(tile_addr + (pixel_y * 2 + 1) as u16);
             
-            if x == 1 {
-                println!("tile number: {:?}", tile_number);
-                println!("pixel x: {:?}, pixel y: {:?}, x: {:?}, y: {:?}", pixel_x, pixel_y, x, y);
-                println!("Tile addr: {:x}, tile line: {:x}, tile line high: {:x}", tile_addr + (pixel_y * 2) as u16, tile_line, tile_line_high);
-            }
-
             // Get color number for this pixel
             let color_bit = 7 - pixel_x;
             let color_number = ((tile_line_high >> color_bit) & 1) << 1 | ((tile_line >> color_bit) & 1);
-            // println!("tile line: {:x}, tile line high: {:x}, color number: {:?}", tile_line, tile_line_high, color_number);
-            // println!("pixel x: {:?}, pixel y: {:?}, x: {:?}, y: {:?}", pixel_x, pixel_y, x, y);
 
             // Convert color number to RGBA (using a simple grayscale palette for now)
             let color = match color_number {
@@ -318,11 +308,7 @@ impl<'a> GPU<'a> {
 
             // Write to screen buffer
             let screen_index = (y as usize * SCANLINE_SIZE as usize + (x as usize )* 4 as usize);
-            // println!("screen index: {:?}", screen_index);
             self.screen_buffer[screen_index..screen_index + 4].copy_from_slice(&color);
-            if screen_index == 4 {
-                println!("screen buffer rene: {:?} {:?} {:?} {:?}", self.screen_buffer[screen_index], self.screen_buffer[screen_index + 1], self.screen_buffer[screen_index + 2], self.screen_buffer[screen_index + 3]);
-            }
         }
     }
 
@@ -384,22 +370,15 @@ impl<'a> GPU<'a> {
                 // Get pixel data from tile
                 let tile_line = self.read_vram(tile_addr + (pixel_y * 2) as u16);
                 let tile_line_high = self.read_vram(tile_addr + (pixel_y * 2 + 1) as u16);
-                // println!("sprite addr: {:?}", sprite_addr);
-                // println!("tile line addr: {:?}", tile_addr + (pixel_y * 2) as u16);
-                // println!("tile line high addr: {:?}", tile_addr + (pixel_y * 2 + 1) as u16);
-                println!("check y {:?}, sprite_y: {:?}, pixel y: {:?}, tile no.: {:?}, tile addr: {:?}, tile_line: {:?}, tile_line_high: : {:?}", y, sprite_y, pixel_y, tile_number, tile_addr, tile_line, tile_line_high);
 
                 // Get color number for this pixel
                 let color_bit = 7 - pixel_x;
-                // println!("color bit: {:?}", color_bit);
                 let color_number = ((tile_line_high >> color_bit) & 1) << 1 | ((tile_line >> color_bit) & 1);
 
                 // Skip transparent pixels (color 0)
                 if color_number == 0 {
-                    println!("skipping color?");
                     continue;
                 }
-                println!("color number: {:?}", color_number);
 
                 // Convert color number to RGBA (using a simple grayscale palette for now)
                 let color = match color_number {
@@ -415,7 +394,6 @@ impl<'a> GPU<'a> {
                     let screen_index = (y as usize * SCANLINE_SIZE as usize + screen_x as usize) * 4;
                     if priority || self.screen_buffer[screen_index] == 0xFF {
                         self.screen_buffer[screen_index..screen_index + 4].copy_from_slice(&color);
-                        println!("hi {:?}", screen_index);
                     }
                 }
             }
