@@ -307,7 +307,7 @@ impl<'a> GPU<'a> {
             };
 
             // Write to screen buffer
-            let screen_index = (y as usize * SCANLINE_SIZE as usize + (x as usize )* 4 as usize);
+            let screen_index = y as usize * SCANLINE_SIZE as usize + x as usize * 4 as usize;
             self.screen_buffer[screen_index..screen_index + 4].copy_from_slice(&color);
         }
     }

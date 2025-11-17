@@ -803,19 +803,19 @@ impl<'a> CPU<'a> {
 
   fn scf(&mut self) {
     let flags = self.registers.get_f();
-    self.set_flags((flags & (FlagMasks::ZERO as u8) != 0), false, false, true);
+    self.set_flags(flags & (FlagMasks::ZERO as u8) != 0, false, false, true);
   }
 
   fn ccf(&mut self) {
     let flags = self.registers.get_f();
-    self.set_flags((flags & (FlagMasks::ZERO as u8) != 0), false, false, !(flags & (FlagMasks::CARRY as u8) != 0));
+    self.set_flags(flags & (FlagMasks::ZERO as u8) != 0, false, false, !(flags & (FlagMasks::CARRY as u8) != 0));
   }
 
   fn cpl(&mut self) {
     let a = self.registers.get_a();
     self.registers.set_a(!a);
     let flags = self.registers.get_f();
-    self.set_flags((flags & (FlagMasks::ZERO as u8) != 0), true, true, (flags & (FlagMasks::CARRY as u8) != 0));
+    self.set_flags(flags & (FlagMasks::ZERO as u8) != 0, true, true, flags & (FlagMasks::CARRY as u8) != 0);
   }
 
   pub fn execute(&mut self, instruction: Instruction) {
